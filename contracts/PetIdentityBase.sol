@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {IPetIdentityBase} from "./interfaces/IPetIdentityBase.sol";
 
 /**
@@ -10,25 +11,78 @@ import {IPetIdentityBase} from "./interfaces/IPetIdentityBase.sol";
  * @dev PetIdentity NFT Base is a contract for managing pet profiles as NFTs
  */
 abstract contract PetIdentityBase is
-    ERC721URIStorageUpgradeable,
+    Initializable,
+    ERC721Upgradeable,
     IPetIdentityBase
 {
     /*** STATE VARIABLES ***/
     uint256 internal _currentIndex;
     uint256 internal _burnCount;
-    mapping(address => uint256) public nonces;
+    mapping(uint256 => string) private _tokenURIs;
 
-    /*** PUBLIC */
     /**
      * @inheritdoc IPetIdentityBase
      */
     function burn(uint256 tokenId) public virtual {
-        require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: transfer caller is not owner nor approved"
-        );
         super._burn(tokenId);
+
+        if (bytes(_tokenURIs[tokenId]).length != 0) {
+            delete _tokenURIs[tokenId];
+        }
         _burnCount++;
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
+        _requireMinted(tokenId);
+
+        string memory _tokenURI = _tokenURIs[tokenId];
+        string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        if (bytes(base).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        if (bytes(_tokenURI).length > 0) {
+            return string(abi.encodePacked(base, _tokenURI));
+        }
+
+        return super.tokenURI(tokenId);
+    }
+
+    function _setTokenURI(
+        uint256 tokenId,
+        string memory _tokenURI
+    ) internal virtual {
+        require(_exists(tokenId), "TOKEN_DOES_NOT_EXIST");
+        _tokenURIs[tokenId] = _tokenURI;
+    }
+
+    function transferFrom(address, address, uint256) public pure override {
+        revert("NOT_ALLOWED");
+    }
+
+    function safeTransferFrom(address, address, uint256) public pure override {
+        revert("NOT_ALLOWED");
+    }
+
+    function safeTransferFrom(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public pure override {
+        revert("NOT_ALLOWED");
+    }
+
+    function approve(address, uint256) public pure override {
+        revert("NOT_ALLOWED");
+    }
+
+    function setApprovalForAll(address, bool) public pure override {
+        revert("NOT_ALLOWED");
     }
 
     /*** EXTERNAL ***/

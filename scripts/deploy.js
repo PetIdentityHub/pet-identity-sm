@@ -19,20 +19,20 @@ async function main() {
   );
 
   console.log("PetProfileNFT deployed to:", petProfileNFT.address);
-  // const [owner, service, ...otherAccounts] = await ethers.getSigners();
-  // const name = "PetProfileNFT";
-  // const symbol = "PPNFT";
+  await writeDeploymentInfo(petProfileNFT, "petProfileNFT.json");
+}
 
-  // const PetProfileNFT = await hre.ethers.getContractFactory("PetProfileNFT");
-  // const petProfileNFT = await hre.upgrades.deployProxy(
-  //   PetProfileNFT,
-  //   [owner.address, service.address, name, symbol],
-  //   { initializer: "initialize" }
-  // );
-
-  // await petProfileNFT.deployed();
-
-  // console.log(`PetProfileNFT deployed to ${petProfileNFT.address}`);
+async function writeDeploymentInfo(contract, filename = "") {
+  const data = {
+    network: hre.network.name,
+    contract: {
+      address: contract.address,
+      signerAddress: contract.signer.address,
+      abi: contract.interface.format(),
+    },
+  };
+  const content = JSON.stringify(data, null, 2);
+  await fs.writeFile(filename, content, { encoding: "utf-8" });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
