@@ -1,0 +1,27 @@
+{
+  "name": "pet-identity-hub-sm",
+  "version": "1.0.0",
+  "description": "Prof of concept pet identity blockchain solution",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Przemyslaw Chabasinski",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "@openzeppelin/truffle-upgrades": "^1.17.1",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.13.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.3",
+    "@openzeppelin/contracts-upgradeable": "^4.8.2",
+    "@openzeppelin/test-helpers": "^0.5.16",
+    "chai": "^4.3.7"
+  }
+}
