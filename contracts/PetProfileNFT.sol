@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import {IPetProfileNFT} from "./interfaces/IPetProfileNFT.sol";
 import {PetIdentityBase} from "./PetIdentityBase.sol";
-import {PetIdentityNFTStorage} from "./PetIdentityNFTStorage.sol";
+import {PetProfileNFTStorage} from "./storages/PetProfileNFTStorage.sol";
 import {PetIdentityTypes} from "./PetIdentityTypes.sol";
+import {PetIdentityActions} from "./PetIdentityActions.sol";
 
 /**
  * @title PetProfileNFT
@@ -19,7 +20,7 @@ import {PetIdentityTypes} from "./PetIdentityTypes.sol";
 contract PetProfileNFT is
     PausableUpgradeable,
     PetIdentityBase,
-    PetIdentityNFTStorage,
+    PetProfileNFTStorage,
     OwnableUpgradeable,
     AccessControlUpgradeable,
     IPetProfileNFT
@@ -58,13 +59,21 @@ contract PetProfileNFT is
     ) internal initializer {
         __ERC721_init(name, symbol);
         __Ownable_init();
-        __Pausable_init();
         __AccessControl_init();
         transferOwnership(owner);
         _service = service;
         _setupRole(BACKEND_ROLE, _service);
+        _pause();
 
         emit Initialize(owner, service, name, symbol);
+    }
+
+    function pause(bool toPause) external onlyOwner {
+        if (toPause) {
+            _pause();
+        } else {
+            _unpause();
+        }
     }
 
     /**
@@ -80,45 +89,11 @@ contract PetProfileNFT is
     /**
      * @inheritdoc IPetProfileNFT
      */
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    /**
-     * @inheritdoc IPetProfileNFT
-     */
-    function unpause() public onlyOwner {
-        _unpause();
-    }
-
-    /**
-     * @inheritdoc IPetProfileNFT
-     */
     function getProfileIdByChipId(
         string memory chipId
     ) public view returns (uint256) {
         require(bytes(chipId).length > 0, "EMPTY_CHIP_ID");
         return _petProfileIdByChipId[chipId];
-    }
-
-    /**
-     * @inheritdoc IPetProfileNFT
-     */
-    function getChipId(uint256 profileId) public view returns (string memory) {
-        require(_exists(profileId), "ERC721: invalid token ID");
-        return _chipIdByProfileId[profileId];
-    }
-
-    /**
-     * @inheritdoc IPetProfileNFT
-     */
-    function updateChipId(
-        uint256 profileId,
-        string memory chipId
-    ) external isApprovedOrOwner(profileId, _msgSender()) {
-        require(_exists(profileId), "ERC721: invalid token ID");
-        require(bytes(chipId).length > 0, "EMPTY_CHIP_ID");
-        _chipIdByProfileId[profileId] = chipId;
     }
 
     /**
@@ -136,34 +111,38 @@ contract PetProfileNFT is
      * @inheritdoc IPetProfileNFT
      */
     function createPetProfile(
-        PetIdentityTypes.PetProfile calldata petProfile,
-        string memory metadataURI
+        PetIdentityTypes.CreatePetProfile calldata data
     ) public returns (uint256) {
         require(
-            bytes(petProfile.chipId).length > 0 &&
-                bytes(metadataURI).length > 0 &&
-                bytes(petProfile.name).length > 0,
+            bytes(data.chipId).length > 0 &&
+                bytes(data.metadataUri).length > 0 &&
+                bytes(data.name).length > 0,
             "INVALID_INPUT"
         );
         require(
-            _petProfileIdByChipId[petProfile.chipId] == 0,
+            _petProfileIdByChipId[data.chipId] == 0,
             "CHIP_ID_ALREADY_EXISTS"
         );
 
         uint256 newPetProfileId = _mint(msg.sender);
-        bytes32 petNameHash = keccak256(abi.encodePacked(petProfile.name));
-        _setTokenURI(newPetProfileId, metadataURI);
-        _chipIdByProfileId[newPetProfileId] = petProfile.chipId;
-        _petProfileIdByChipId[petProfile.chipId] = newPetProfileId;
-        _petProfileById[newPetProfileId] = petProfile;
-        _petProfileIdByNameHash[petNameHash] = newPetProfileId;
+        bytes32 petNameHash = keccak256(abi.encodePacked(data.name));
+        _setTokenURI(newPetProfileId, data.metadataUri);
+        PetIdentityBase._setOwnedPetProfileId(msg.sender, newPetProfileId);
+        PetIdentityActions.createProfilePostAction(
+            data,
+            newPetProfileId,
+            petNameHash,
+            _petProfileById,
+            _petProfileIdByChipId,
+            _petProfileIdByNameHash
+        );
 
         emit PetProfileCreated(
             msg.sender,
             newPetProfileId,
-            petProfile.chipId,
-            petProfile.name,
-            metadataURI
+            data.chipId,
+            data.name,
+            data.metadataUri
         );
 
         return newPetProfileId;

@@ -19,6 +19,7 @@ abstract contract PetIdentityBase is
     uint256 internal _currentIndex;
     uint256 internal _burnCount;
     mapping(uint256 => string) private _tokenURIs;
+    mapping(address => uint256[]) private _ownerTokens;
 
     /**
      * @inheritdoc IPetIdentityBase
@@ -30,6 +31,19 @@ abstract contract PetIdentityBase is
             delete _tokenURIs[tokenId];
         }
         _burnCount++;
+    }
+
+    function getOwnedPetProfiles(
+        address owner
+    ) public view virtual returns (uint256[] memory) {
+        return _ownerTokens[owner];
+    }
+
+    function _setOwnedPetProfileId(
+        address owner,
+        uint256 tokenId
+    ) internal virtual {
+        _ownerTokens[owner].push(tokenId);
     }
 
     function tokenURI(
