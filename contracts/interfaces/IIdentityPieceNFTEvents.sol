@@ -20,4 +20,10 @@ interface IIdentityPieceNFTEvents {
         address indexed owner,
         uint256 timestamp
     );
+    event DeployIdentityPieceNFT(
+        uint256 issuerId,
+        uint256 pieceId,
+        address indexed identityPieceNFT,
+        uint256 timestamp
+    );
 }

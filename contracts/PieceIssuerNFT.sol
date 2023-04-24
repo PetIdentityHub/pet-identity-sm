@@ -2,43 +2,48 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import {IPieceIssuerNFT} from "./interfaces/IPieceIssuerNFT.sol";
 import {PetIdentityBase} from "./PetIdentityBase.sol";
-import {PetIdentityNFTStorage} from "./PetIdentityNFTStorage.sol";
+import {PieceIssuerNFTStorage} from "./storages/PieceIssuerNFTStorage.sol";
 import {PetIdentityTypes} from "./PetIdentityTypes.sol";
 import {PetIdentityActions} from "./PetIdentityActions.sol";
 
 contract PieceIssuerNFT is
     PausableUpgradeable,
     PetIdentityBase,
-    PetIdentityNFTStorage,
+    PieceIssuerNFTStorage,
     OwnableUpgradeable,
     IPieceIssuerNFT
 {
+    address public PIECE_BEACON;
+
     function initialize(
+        address pieceBeacon,
         address owner,
         string calldata name,
         string calldata symbol
     ) public initializer {
         require(owner != address(0), "INVALID_OWNER");
+        require(pieceBeacon != address(0), "INVALID_BEACON");
         require(bytes(name).length > 0, "EMPTY_NAME");
         require(bytes(symbol).length > 0, "EMPTY_SYMBOL");
-        __ERC721_init(name, symbol);
+        PIECE_BEACON = pieceBeacon;
+        PetIdentityBase._initialize(name, symbol);
         __Ownable_init();
         transferOwnership(owner);
-
+        _pause();
         emit Initialize(owner, name, symbol, block.timestamp);
     }
 
     // ************** PUBLIC **************
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    function unpause() public onlyOwner {
-        _unpause();
+    function pause(bool toPause) external onlyOwner {
+        if (toPause) {
+            _pause();
+        } else {
+            _unpause();
+        }
     }
 
     function createIssuerProfile(
@@ -90,13 +95,22 @@ contract PieceIssuerNFT is
         emit IssuerAccepted(issuer, operator, block.timestamp);
     }
 
-    function registerPiece() external whenNotPaused {}
+    function registerPiece(
+        PetIdentityTypes.ListingPieceParams calldata data
+    ) external whenNotPaused {
+        PetIdentityActions.listingPieceNFT(
+            data,
+            PIECE_BEACON,
+            _pieceIssuerById,
+            _pieceByIdByIssuerId
+        );
+    }
 
     function addOperator(
         address operator,
         PetIdentityTypes.Operator calldata operatorData
     ) external onlyOwner whenNotPaused {
-        PetIdentityActions.addOperator(
+        PetIdentityActions.setOperator(
             operator,
             operatorData,
             _operatorByAddress

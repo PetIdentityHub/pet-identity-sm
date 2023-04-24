@@ -2,25 +2,9 @@
 
 pragma solidity ^0.8.18;
 
-import {PetIdentityTypes} from "./PetIdentityTypes.sol";
+import {PetIdentityTypes} from "../PetIdentityTypes.sol";
 
-contract PetIdentityNFTStorage {
-    /**
-     * @dev Keeps track of pet profile data
-     */
-    mapping(uint256 => PetIdentityTypes.PetProfile) internal _petProfileById;
-    /**
-     * @dev Keeps track of pet profile id by chip
-     */
-    mapping(string => uint256) internal _petProfileIdByChipId;
-    /**
-     * @dev Keeps track of pet profile id by name hash
-     */
-    mapping(bytes32 => uint256) internal _petProfileIdByNameHash;
-    /**
-     * @dev Keeps track of pet profile piece data
-     */
-    mapping(uint256 => string) internal _chipIdByProfileId;
+contract PieceIssuerNFTStorage {
     /**
      * @dev Keeps track of accepted piece issuers
      */
@@ -28,7 +12,7 @@ contract PetIdentityNFTStorage {
     /**
      * @dev Keeps track of piece issuer data
      */
-    mapping(uint256 => PetIdentityTypes.PieceIssuer) internal _pieceIssuerById;
+    mapping(uint256 => PetIdentityTypes.IssuerStruct) internal _pieceIssuerById;
     /**
      * @dev Keeps track of aplicant wallet address and application data
      */
@@ -39,4 +23,6 @@ contract PetIdentityNFTStorage {
     //need add a way to get waiting applications by operator
     mapping(address => address[]) internal _applicationsByOperator;
     mapping(address => PetIdentityTypes.Operator) internal _operatorByAddress;
+    mapping(uint256 => mapping(uint256 => PetIdentityTypes.PieceStruct))
+        internal _pieceByIdByIssuerId;
 }

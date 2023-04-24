@@ -1,25 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {PetIdentityNFTStorage} from "./PetIdentityNFTStorage.sol";
+import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+
+import {PetProfileNFTStorage} from "./storages/PetProfileNFTStorage.sol";
+import {PieceIssuerNFTStorage} from "./storages/PieceIssuerNFTStorage.sol";
 import {PetIdentityTypes} from "./PetIdentityTypes.sol";
 
+import {IIdentityPieceNFT} from "./interfaces/IIdentityPieceNFT.sol";
+
 library PetIdentityActions {
-    function listingPiece(
-        PetIdentityTypes.ListingPieceData calldata listingPieceData,
-        mapping(uint256 => PetIdentityTypes.PieceIssuer)
-            storage _pieceIssuerById,
-        mapping(uint256 => mapping(uint256 => PetIdentityTypes.PieceIssuer))
-            storage _pieceIssuerByPetProfileId
-    ) external returns (uint256) {}
-
-    function gatheringPiece() external returns (uint256) {}
-
-    function addOperator(
+    function setOperator(
         address operator,
         PetIdentityTypes.Operator calldata operatorData,
         mapping(address => PetIdentityTypes.Operator) storage _operators
-    ) internal {
+    ) external {
         require(operator != address(0), "INVALID_ADDR");
         require(bytes(operatorData.name).length > 0, "EMPTY_NAME");
         require(bytes(operatorData.country).length > 0, "EMPTY_COUNTRY");
@@ -69,5 +64,103 @@ library PetIdentityActions {
             "INVALID_APPLICATION"
         );
         _acceptedIssuers[issuer] = true;
+    }
+
+    function gatherPiece(
+        PetIdentityTypes.GatherPieceParams calldata params,
+        mapping(uint256 => mapping(uint256 => PetIdentityTypes.PieceStruct))
+            storage _pieceByIdByIssuerId
+    ) external returns (uint256 tokenId) {
+        address pieceNFT = _pieceByIdByIssuerId[params.issuerId][params.pieceId]
+            .pieceNFT;
+        if (pieceNFT == address(0)) {
+            pieceNFT = _deployPieceNFT(
+                params.issuerId,
+                params.pieceId,
+                params.name,
+                params.symbol,
+                params.pieceBeacon,
+                _pieceByIdByIssuerId
+            );
+        }
+
+        tokenId = IIdentityPieceNFT(pieceNFT).mint(msg.sender);
+    }
+
+    function listingPieceNFT(
+        PetIdentityTypes.ListingPieceParams calldata params,
+        address identityPieceBeacon,
+        mapping(uint256 => PetIdentityTypes.IssuerStruct)
+            storage _pieceIssuerById,
+        mapping(uint256 => mapping(uint256 => PetIdentityTypes.PieceStruct))
+            storage _pieceByIdByIssuerId
+    ) external {
+        require(
+            bytes(_pieceIssuerById[params.issuerId].name).length > 0,
+            "INVALID_ISSUER"
+        );
+        require(bytes(params.name).length > 0, "EMPTY_NAME");
+        require(bytes(params.symbol).length > 0, "EMPTY_SYMBOL");
+        require(bytes(params.pieceTokenURI).length > 0, "EMPTY_METADATA_URI");
+
+        uint256 pieceId = ++_pieceIssuerById[params.issuerId].numberOfPieces;
+        _pieceByIdByIssuerId[params.issuerId][pieceId].name = params.name;
+        _pieceByIdByIssuerId[params.issuerId][pieceId].symbol = params.symbol;
+        _pieceByIdByIssuerId[params.issuerId][pieceId].pieceTokenURI = params
+            .pieceTokenURI;
+
+        if (params.shouldDeploy) {
+            _deployPieceNFT(
+                params.issuerId,
+                pieceId,
+                params.name,
+                params.symbol,
+                identityPieceBeacon,
+                _pieceByIdByIssuerId
+            );
+        }
+    }
+
+    function _deployPieceNFT(
+        uint256 issuerId,
+        uint256 pieceId,
+        string calldata name,
+        string calldata symbol,
+        address identityPieceBeacon,
+        mapping(uint256 => mapping(uint256 => PetIdentityTypes.PieceStruct))
+            storage _pieceByIdByIssuerId
+    ) private returns (address) {
+        bytes memory initData = abi.encodeWithSelector(
+            IIdentityPieceNFT.initialize.selector,
+            issuerId,
+            name,
+            symbol
+        );
+
+        address pieceNFT = address(
+            new BeaconProxy{
+                salt: keccak256(abi.encodePacked(issuerId, pieceId))
+            }(identityPieceBeacon, initData)
+        );
+
+        _pieceByIdByIssuerId[issuerId][pieceId].pieceNFT = pieceNFT;
+        //Event issuerId, pieceId, pieceNFT
+
+        return pieceNFT;
+    }
+
+    function createProfilePostAction(
+        PetIdentityTypes.CreatePetProfile calldata data,
+        uint256 petProfileId,
+        bytes32 petNameHash,
+        mapping(uint256 => PetIdentityTypes.PetProfile) storage _petProfileById,
+        mapping(string => uint256) storage _petProfileIdByChipId,
+        mapping(bytes32 => uint256) storage _petProfileIdByNameHash
+    ) external {
+        _petProfileIdByChipId[data.chipId] = petProfileId;
+        _petProfileById[petProfileId].name = data.name;
+        _petProfileById[petProfileId].chipId = data.chipId;
+        _petProfileById[petProfileId].metadataUri = data.metadataUri;
+        _petProfileIdByNameHash[petNameHash] = petProfileId;
     }
 }

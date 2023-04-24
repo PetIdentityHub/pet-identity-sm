@@ -8,25 +8,59 @@ library PetIdentityTypes {
         string metadataUri;
     }
 
+    struct GatherPieceData {
+        address petAddress;
+        uint256 petProfileId;
+        uint256 issuerId;
+        uint256 pieceId;
+        address pieceBeacon;
+    }
+
+    struct GatherPieceParams {
+        uint256 issuerId;
+        uint256 pieceId;
+        string name;
+        string symbol;
+        string pieceTokenURI;
+        address pieceBeacon;
+    }
+
+    struct CreatePetProfile {
+        string name;
+        string chipId;
+        string metadataUri;
+    }
+
+    struct ListingPieceParams {
+        uint256 issuerId;
+        string name;
+        string symbol;
+        string pieceTokenURI;
+        bool shouldDeploy;
+    }
+
     struct PetProfile {
         string name;
         string chipId;
-        uint256[] pieces;
+        string metadataUri;
     }
 
-    struct PetProfilePiece {
+    struct PieceStruct {
+        address pieceNFT;
         string name;
-        string description;
-        string metadataURI;
+        string symbol;
+        string pieceTokenURI;
     }
 
-    struct PieceIssuer {
+    struct IssuerStruct {
         string name;
         address operator;
+        uint256 numberOfPieces;
     }
 
     struct ListingPieceData {
-        uint256 pieceIssuerId;
+        uint256 issuerId;
+        uint256 pieceId;
         string name;
         string symbol;
         string pieceTokenURI;
