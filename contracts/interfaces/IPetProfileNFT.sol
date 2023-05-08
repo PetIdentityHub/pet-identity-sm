@@ -7,16 +7,21 @@ import {PetIdentityTypes} from "../PetIdentityTypes.sol";
 
 interface IPetProfileNFT is IPetProfileNFTEvents {
     /**
+     * @notice onlyOwner - function to start or stop contract functionality.
+     * @param toPause bool value to set pause state. true - when pause, false - when not.
+     */
+    function pause(bool toPause) external;
+
+    /**
      * @notice onlyOwner - function to change the backend service address.
      * @dev contract has service address with role BACKEND_ROLE. It help us to keep standard of metadataUri.
      * @param _backendService address of the new service.
      */
     function changeService(address _backendService) external;
 
-    function pause(bool toPause) external;
-
     /**
-     * @notice For all users -function return profileId (nft tokenId) by chipId.
+     * @notice everyone - function return profileId (nft tokenId) by chipId.
+     * @dev Could revert when chipId not exist.
      * @param chipId chip id of the pet.
      */
     function getProfileIdByChipId(
@@ -24,7 +29,7 @@ interface IPetProfileNFT is IPetProfileNFTEvents {
     ) external view returns (uint256);
 
     /**
-     * @notice For all users -function return profileId (nft tokenId) by name.
+     * @notice everyone -function return profileId (nft tokenId) by name.
      * @param name name of the pet.
      */
     function getProfileIdByName(

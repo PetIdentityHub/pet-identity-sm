@@ -68,6 +68,9 @@ contract PetProfileNFT is
         emit Initialize(owner, service, name, symbol);
     }
 
+    /**
+     * @inheritdoc IPetProfileNFT
+     */
     function pause(bool toPause) external onlyOwner {
         if (toPause) {
             _pause();
