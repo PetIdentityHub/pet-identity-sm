@@ -8,6 +8,8 @@ import {PieceIssuerNFTStorage} from "./storages/PieceIssuerNFTStorage.sol";
 import {PetIdentityTypes} from "./PetIdentityTypes.sol";
 
 import {IIdentityPieceNFT} from "./interfaces/IIdentityPieceNFT.sol";
+import {IPetProfileNFT} from "./interfaces/IPetProfileNFT.sol";
+import {IPieceIssuerNFT} from "./interfaces/IPieceIssuerNFT.sol";
 
 library PetIdentityActions {
     function setOperator(
@@ -144,7 +146,6 @@ library PetIdentityActions {
         );
 
         _pieceByIdByIssuerId[issuerId][pieceId].pieceNFT = pieceNFT;
-        //Event issuerId, pieceId, pieceNFT
 
         return pieceNFT;
     }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./PieceIssuerNFT.sol";
 
 import {IIdentityPieceNFT} from "./interfaces/IIdentityPieceNFT.sol";
