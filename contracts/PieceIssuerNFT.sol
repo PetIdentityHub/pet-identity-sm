@@ -37,7 +37,9 @@ contract PieceIssuerNFT is
         emit Initialize(owner, name, symbol, block.timestamp);
     }
 
-    // ************** PUBLIC **************
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
     function pause(bool toPause) external onlyOwner {
         if (toPause) {
             _pause();
@@ -46,6 +48,9 @@ contract PieceIssuerNFT is
         }
     }
 
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
     function createIssuerProfile(
         address sender,
         string memory metadataURI
@@ -57,10 +62,18 @@ contract PieceIssuerNFT is
         uint256 newIssuerId = _mint(sender);
         _setTokenURI(newIssuerId, metadataURI);
 
+        emit IssuerProfileCreated(
+            sender,
+            newIssuerId,
+            metadataURI,
+            block.timestamp
+        );
         return newIssuerId;
     }
 
-    // ************** EXTERNAL **************
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
     function applyAsIssuer(
         address sender,
         PetIdentityTypes.ApplicationIssuerData calldata data
@@ -72,8 +85,13 @@ contract PieceIssuerNFT is
             _applicationsByOperator,
             _operatorByAddress
         );
+
+        emit IssuerApplied(sender, data.operator, data.name, block.timestamp);
     }
 
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
     function getApplication(
         address applicant
     ) external view returns (PetIdentityTypes.ApplicationIssuerData memory) {
@@ -81,6 +99,9 @@ contract PieceIssuerNFT is
         return _applicationIssuerByWalletAddress[applicant];
     }
 
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
     function acceptIssuer(
         address issuer,
         address operator
@@ -95,7 +116,10 @@ contract PieceIssuerNFT is
         emit IssuerAccepted(issuer, operator, block.timestamp);
     }
 
-    function registerPiece(
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
+    function listPiece(
         PetIdentityTypes.ListingPieceParams calldata data
     ) external whenNotPaused {
         PetIdentityActions.listingPieceNFT(
@@ -104,9 +128,18 @@ contract PieceIssuerNFT is
             _pieceIssuerById,
             _pieceByIdByIssuerId
         );
+        emit PieceNFTListed(
+            data.issuerId,
+            data.name,
+            data.symbol,
+            block.timestamp
+        );
     }
 
-    function addOperator(
+    /**
+     * @inheritdoc IPieceIssuerNFT
+     */
+    function setOperator(
         address operator,
         PetIdentityTypes.Operator calldata operatorData
     ) external onlyOwner whenNotPaused {
@@ -115,7 +148,7 @@ contract PieceIssuerNFT is
             operatorData,
             _operatorByAddress
         );
-        emit AddOperator(operator, msg.sender, block.timestamp);
+        emit OperatorSet(operator, msg.sender, block.timestamp);
     }
 
     function getOperator(

@@ -14,9 +14,30 @@ interface IPieceIssuerNFTEvents {
         uint256 timestamp
     );
 
-    event AddOperator(
+    event OperatorSet(
         address indexed operator,
         address indexed sender,
+        uint256 timestamp
+    );
+
+    event IssuerApplied(
+        address indexed sender,
+        address indexed operator,
+        string name,
+        uint256 timestamp
+    );
+
+    event PieceNFTListed(
+        uint256 indexed issuerId,
+        string name,
+        string symbol,
+        uint256 timestamp
+    );
+
+    event IssuerProfileCreated(
+        address indexed sender,
+        uint256 indexed issuerId,
+        string metadataURI,
         uint256 timestamp
     );
 }
