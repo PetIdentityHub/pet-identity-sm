@@ -7,18 +7,18 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   //PetProfile initial values
   const namePetProfile = "PetProfileNFT";
-  const symbolPetProfile = "PPNFT";
-  const ownerPetProfile = "0x3fA5eEC0594Fff8D614C0560AcC848D8c300f9B4";
-  const servicePetProfile = "0x3fA5eEC0594Fff8D614C0560AcC848D8c300f9B4";
+  const symbolPetProfile = "PetNFT";
+  const ownerPetProfile = "0xd20A336057A940BCae44554B1B5CbC2C716bED5d";
+  const servicePetProfile = "0xd20A336057A940BCae44554B1B5CbC2C716bED5d";
 
   //PieceIssuer initial values
   const nameIssuer = "PieceIssuerNFT";
-  const symbolIssuer = "PINFT";
-  const ownerIssuer = "0x3fA5eEC0594Fff8D614C0560AcC848D8c300f9B4";
-  const serviceIssuer = "0x3fA5eEC0594Fff8D614C0560AcC848D8c300f9B4";
+  const symbolIssuer = "PiNFT";
+  const ownerIssuer = "0xd20A336057A940BCae44554B1B5CbC2C716bED5d";
+  const serviceIssuer = "0xd20A336057A940BCae44554B1B5CbC2C716bED5d";
 
   //Beacon initial values
-  const ownerBeacon = "0x3fA5eEC0594Fff8D614C0560AcC848D8c300f9B4";
+  const ownerBeacon = "0xd20A336057A940BCae44554B1B5CbC2C716bED5d";
 
   console.log("Deploying contracts with the account:", deployer.address);
 
@@ -32,7 +32,7 @@ async function main() {
     "PetIdentityActions library deployed at:",
     petIdentityActions.address
   );
-  await writeDeploymentInfo(petIdentityActions, "petIdentityActions.json");
+  await writeDeploymentInfo(petIdentityActions, "petIdentityActions");
 
   //PetProfileNFT deploy
   const PetProfileNFT = await ethers.getContractFactory("PetProfileNFT", {
@@ -50,7 +50,7 @@ async function main() {
   );
 
   console.log("PetProfileNFT deployed to:", petProfileNFT.address);
-  await writeDeploymentInfo(petProfileNFT, "petProfileNFT.json");
+  await writeDeploymentInfo(petProfileNFT, "petProfileNFT");
 
   console.log("Deploying contracts with the account:", deployer.address);
 
@@ -62,7 +62,7 @@ async function main() {
     pieceNFTImplementation.address
   );
 
-  await writeDeploymentInfo(pieceNFTImplementation, "identityPieceNFT.json");
+  await writeDeploymentInfo(pieceNFTImplementation, "identityPieceNFT");
 
   const Beacon = await hre.ethers.getContractFactory("UpgradeableBeacon");
   const beacon = await Beacon.deploy(
@@ -72,7 +72,7 @@ async function main() {
   await beacon.deployed();
   console.log("Beacon deployed at:", beacon.address);
 
-  await writeDeploymentInfo(beacon, "beacon.json");
+  await writeDeploymentInfo(beacon, "beacon");
 
   //PieceIssuerNFT deploy
   const PieceIssuerNFT = await ethers.getContractFactory("PieceIssuerNFT", {
@@ -90,10 +90,14 @@ async function main() {
   );
 
   console.log("PieceIssuerNFT deployed to:", pieceIssuerNFT.address);
-  await writeDeploymentInfo(pieceIssuerNFT, "pieceIssuerNFT.json");
+  await writeDeploymentInfo(pieceIssuerNFT, "pieceIssuerNFT");
 }
 
-async function writeDeploymentInfo(contract, filename = "") {
+async function writeDeploymentInfo(
+  contract,
+  filename = "",
+  extension = "json"
+) {
   const data = {
     network: hre.network.name,
     contract: {
@@ -107,7 +111,9 @@ async function writeDeploymentInfo(contract, filename = "") {
     "deployment_logs/".concat(
       filename,
       "_",
-      new Date().toISOString().slice(0, 10)
+      new Date().toISOString().slice(0, 10),
+      ".",
+      extension
     ),
     content,
     {
