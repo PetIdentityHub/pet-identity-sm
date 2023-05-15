@@ -99,6 +99,10 @@ contract PieceIssuerNFT is
         return _applicationIssuerByWalletAddress[applicant];
     }
 
+    function getApplications() external view returns (address[] memory) {
+        return _applicationsByOperator[msg.sender];
+    }
+
     /**
      * @inheritdoc IPieceIssuerNFT
      */

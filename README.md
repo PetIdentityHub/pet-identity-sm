@@ -61,7 +61,7 @@ Last but not least is build smart contract protocols wrapped by API which make P
 - Using direct our smart contract or,
 - Using protocol by API.
 
-## Market size
+## 💰 Market size
 
 It is really hard to estimate potential market size. When we looking for analytics reports it is possible to found pet Id microchips market or pet tech market. Most of the report have put Digital Identity Solution together but this notion is much broader than our case.
 
@@ -71,4 +71,34 @@ In case of pet id microchips market size according to The Insights Partners the 
 
 We believe, on our personal experience and when we try to find reliable reports, that our solution is operate in Blue Ocean Strategy. We try to create a new demand and new market place.
 
+## 🧭 Roadmap
+
+- Develop smart contract for concepts: PetProfile, PieceIssuer, Piece. Base concept of our solution could evolve but it's fundament for building.
+- Develop web platform.
+  - Create pet profile,
+  - Search and show pet profile,
+  - Operator dashboard,
+  - Apply and create Piece Issuer Profile,
+  - Piece Issuer dashboard,
+  - Listing and claim PieceNFT
+- Create API and documentation to other PetTech industry developers,
+- Concept and develop smart contract middleware with engine,
+- Concept and develop middleware for monetize API usage,
+- Create plug-and-play frontend component for authorization,
+- Release alpha, connect with industry, get feedback.
+
+## 🚀 Goals and development directions
+
+Our ultimate goal with this solution is to make a new standard in the industry. We want our protocol to either replace or add to existing rules, like the EU Pet Passport. It's a big goal, but we all share one thing: we love our pets and nature.
+
+A smaller goal is to help find lost pets. Right now, people use social media or special websites to search for their lost pets. The problem is, there are so many social groups and only a few websites to check if someone found our pet. Also, if you find a pet and want to find its owner, it's hard to know where to start.
+
+We think we can make a mobile app that connects to our Pet Identity Hub protocol. This app could use artificial intelligence to recognize pets and guess if it's the right one. We could also use NFC technology to read a pet's microchip and get its ID, which we can check with our protocol.
+
 ## ❗ <u>GEEK ALERT - TECH</u> ❗
+
+Ok, last but not least, time to say a little about our technology.
+
+- A core business logic is smart contracts (Solidity),
+- Frontend will use Angular and React with Federation Module,
+- Backend will provide API for other developer and played the role help infrastructure for Pet Identity Hub Web (NodeJS/.NET)
